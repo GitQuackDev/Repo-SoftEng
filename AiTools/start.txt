@@ -1,0 +1,9 @@
+cd AiTools
+.\venv\Scripts\activate
+uvicorn main:app --reload
+
+
+== Dependencies
+
+pip install fastapi uvicorn
+pip install tensorflow numpy pillow

@@ -1,0 +1,2 @@
+//here is the page for the course list which is related in the Sidebar.jsx of the student, when clicked it should display this page.
+// List of all the courses the student is enrolled in, and when clicked it should  redirect the same with the course list in the sidebar of the student, which is the StudentCourse.jsx 
