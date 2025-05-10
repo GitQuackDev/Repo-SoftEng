@@ -24,13 +24,17 @@ export default function CommentForm({ discussionId, onSuccess, parentCommentId =
     setError('')
 
     try {
-      const response = await fetch(`/api/discussion-forum/discussions/${discussionId}/comments`, {
+      const response = await fetch(`/api/discussion-forum/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-        body: JSON.stringify({ content, parentCommentId }),
+        body: JSON.stringify({
+          discussionId,
+          parentId: parentCommentId || null,
+          sections: [{ type: 'text', content }],
+        }),
       })
 
       if (!response.ok) {

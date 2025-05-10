@@ -177,28 +177,24 @@ function CommentItem({ comment, depth, onRefresh, userId, discussionAuthorId, se
           <div className="mt-3 animate-fade-in-down">
             <CommentForm
               discussionId={comment.discussion}
-              parentId={comment._id}
+              parentCommentId={comment._id}
               onSuccess={() => { setShowReply(false); onRefresh(); }}
-              isReply
-            />
-          </div>
-        )}
-        {showEdit && (
-          <div className="mt-3 animate-fade-in-down">
-            <CommentForm
-              discussionId={comment.discussion}
-              parentId={comment.parent}
-              initialSections={comment.sections}
-              onSuccess={() => { setShowEdit(false); onRefresh(); }}
-              isEdit={true}
-              commentId={comment._id}
+              onCancel={() => setShowReply(false)}
             />
           </div>
         )}
         {comment.replies && comment.replies.length > 0 && (
           <div className="mt-2">
             {comment.replies.map(reply => (
-              <CommentItem key={reply._id} comment={reply} depth={depth + 1} onRefresh={onRefresh} userId={userId} discussionAuthorId={discussionAuthorId} setImageModal={setImageModal} />
+              <CommentItem
+                key={reply._id}
+                comment={reply}
+                depth={depth + 1}
+                onRefresh={onRefresh}
+                userId={userId}
+                discussionAuthorId={discussionAuthorId}
+                setImageModal={setImageModal}
+              />
             ))}
           </div>
         )}
