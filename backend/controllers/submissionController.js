@@ -15,10 +15,17 @@ exports.createSubmission = async (req, res) => {
 // Get all submission items for a course
 exports.getSubmissionsByCourse = async (req, res) => {
   try {
-    const { courseId } = req.params
-    const submissions = await Submission.find({ course: courseId }).populate('submissions.student', 'name email')
-    res.json(submissions)
+    const { courseId } = req.params;
+    console.log(`Fetching assignments for courseId: ${courseId}`); // Log received courseId
+
+    const assignments = await Submission.find({ course: courseId })
+      .populate('submissions.student', 'name email')
+      .populate('course', 'title'); // Keep course population for context if needed
+
+    console.log(`Found ${assignments.length} assignments for courseId: ${courseId}`); // Log number of assignments found
+    res.json(assignments);
   } catch (err) {
+    console.error("Error in getSubmissionsByCourse:", err); // Log the full error
     res.status(500).json({ error: err.message })
   }
 }
@@ -136,3 +143,21 @@ exports.unsubmitStudentWork = async (req, res) => {
     res.status(500).json({ error: err.message })
   }
 }
+
+// Get a single submission item by ID
+exports.getSubmissionById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const submission = await Submission.findById(id)
+      .populate('submissions.student', 'name email') // Populate student details
+      .populate('course', 'title'); // Optionally populate course details if needed
+
+    if (!submission) {
+      return res.status(404).json({ error: 'Submission not found' });
+    }
+    res.json({ data: submission }); // Ensure response is nested under 'data' key
+  } catch (err) {
+    console.error('Error fetching submission by ID:', err); // Log the error
+    res.status(500).json({ error: err.message });
+  }
+};

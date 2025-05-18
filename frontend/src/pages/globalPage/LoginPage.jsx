@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import SignIn from '../../components/loginComponents/SignIn'
 import SignUp from '../../components/loginComponents/SignUp'
 import ForgotPassword from '../../components/loginComponents/ForgotPassword'
@@ -11,6 +11,25 @@ const tabs = [
 
 export default function LoginPage() {
   const [activeTab, setActiveTab] = useState('signin')
+  
+  useEffect(() => {
+    // Set up event listeners for switching between components
+    const handleSwitchToSignup = () => setActiveTab('signup')
+    const handleSwitchToSignin = () => setActiveTab('signin')
+    const handleSwitchToForgot = () => setActiveTab('forgot')
+    
+    // Add event listeners
+    window.addEventListener('switch-to-signup', handleSwitchToSignup)
+    window.addEventListener('switch-to-signin', handleSwitchToSignin)
+    window.addEventListener('switch-to-forgot', handleSwitchToForgot)
+    
+    // Clean up event listeners on component unmount
+    return () => {
+      window.removeEventListener('switch-to-signup', handleSwitchToSignup)
+      window.removeEventListener('switch-to-signin', handleSwitchToSignin)
+      window.removeEventListener('switch-to-forgot', handleSwitchToForgot)
+    }
+  }, [])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans">

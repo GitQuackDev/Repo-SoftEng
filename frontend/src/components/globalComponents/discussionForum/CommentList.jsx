@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import CommentForm from './CommentForm';
 import ImageModal from './ImageModal';
-import { FiThumbsUp, FiThumbsDown, FiMessageCircle, FiEdit2, FiTrash2, FiMoreHorizontal } from 'react-icons/fi';
+import { FiThumbsUp, FiThumbsDown, FiMessageCircle, FiEdit2, FiTrash2, FiMoreHorizontal, FiFileText, FiDownload, FiImage, FiVideo, FiExternalLink } from 'react-icons/fi';
 
 const backendUrl = 'http://localhost:5000';
 function getAttachmentUrl(fileUrl) {
@@ -94,7 +94,6 @@ function CommentItem({ comment, depth, onRefresh, userId, discussionAuthorId, se
   const [showReply, setShowReply] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  // Debug: log userId and comment.author?._id
   const isAuthor = String(userId) === String(comment.author?._id);
   const canDelete = isAuthor || String(userId) === String(discussionAuthorId);
 
@@ -139,41 +138,126 @@ function CommentItem({ comment, depth, onRefresh, userId, discussionAuthorId, se
           <span className="text-xs text-gray-500">{new Date(comment.createdAt).toLocaleString()}</span> {/* Changed text color */}
           {isAuthor && <span className="ml-2 px-2 py-0.5 text-xs rounded bg-indigo-100 text-indigo-700 font-semibold">Author</span>} {/* Changed background and text color */}
         </div>
-        <div className="mb-2 space-y-2">
-          {comment.sections.map((section, idx) => (
-            <div key={idx}>
-              {section.type === 'text' ? (
-                <div className="text-gray-700 whitespace-pre-line text-base leading-relaxed tracking-wide">{section.content}</div> // Changed text color
-              ) : section.type === 'file' && section.fileUrl ? (
-                <div>
-                  {section.fileType === '.pdf' ? (
-                    <a href={getAttachmentUrl(section.fileUrl)} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 underline font-medium">Download PDF</a> // Changed text color
-                  ) : section.fileType && section.fileType.startsWith('.mp4') ? (
-                    <video controls className="rounded-xl border border-gray-300 bg-gray-100 max-w-[320px] max-h-[180px] mt-2"> {/* Changed border and background */}
-                      <source src={getAttachmentUrl(section.fileUrl)} type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
-                  ) : section.fileType && (section.fileType.startsWith('.jpg') || section.fileType.startsWith('.jpeg') || section.fileType.startsWith('.png') || section.fileType.startsWith('.gif') || section.fileType.startsWith('.webp')) ? (
-                    <img
-                      src={getAttachmentUrl(section.fileUrl)}
-                      alt="attachment"
-                      className="rounded-xl border border-gray-300 bg-gray-100 max-w-[180px] max-h-[120px] cursor-pointer object-contain transition-transform duration-200 hover:scale-105 shadow-md mt-2" // Changed border and background
-                      onClick={() => setImageModal({ open: true, src: getAttachmentUrl(section.fileUrl), alt: 'attachment' })}
-                    />
-                  ) : (
-                    <a href={getAttachmentUrl(section.fileUrl)} download className="text-blue-600 hover:text-blue-700 underline font-medium">Download File</a> // Changed text color
-                  )}
+
+        {isAuthor && !showEdit && ( // Show menu only if author and not currently editing
+          <div className="absolute top-3 right-3 z-10">
+            <button
+              onClick={() => setShowMenu(v => !v)}
+              className="p-1 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 shadow transition-transform duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <FiMoreHorizontal size={20} />
+            </button>
+            {showMenu && (
+              <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-xl py-1 z-50 border border-gray-200">
+                <button
+                  onClick={() => { setShowEdit(true); setShowMenu(false); }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 flex items-center gap-2 transition-colors"
+                >
+                  <FiEdit2 size={14} /> Edit
+                </button>
+                {canDelete && (
+                  <button
+                    onClick={() => { handleDelete(); setShowMenu(false); }}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 flex items-center gap-2 transition-colors"
+                  >
+                    <FiTrash2 size={14} /> Delete
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {showEdit ? (
+          <div className="mt-2">
+            <CommentForm
+              isEditMode={true}
+              commentId={comment._id}
+              initialText={comment.sections.find(s => s.type === 'text')?.content || ''}
+              initialExistingFile={
+                comment.sections.find(s => s.type === 'file')
+                  ? { 
+                      name: comment.sections.find(s => s.type === 'file').name, 
+                      url: comment.sections.find(s => s.type === 'file').fileUrl, 
+                      fileType: comment.sections.find(s => s.type === 'file').fileType 
+                    }
+                  : null
+              }
+              onSuccess={() => { setShowEdit(false); onRefresh(); }}
+              onCancel={() => setShowEdit(false)}
+              discussionId={comment.discussion} // Pass for consistency, form might need it
+              parentCommentId={comment.parent} // Pass for consistency
+            />
+          </div>
+        ) : (
+          <>
+            <div className="mb-2 space-y-3">
+              {comment.sections.map((section, idx) => (
+                <div key={idx}>
+                  {section.type === 'text' ? (
+                    <div className="text-gray-700 whitespace-pre-line text-base leading-relaxed tracking-wide">{section.content}</div>
+                  ) : section.type === 'file' && section.fileUrl ? (
+                    <div className="mt-3 p-3 border border-gray-200 rounded-lg bg-gray-50 hover:shadow-md transition-shadow duration-200">
+                      {/* IMAGE RENDERING - MODIFIED */} 
+                      {section.fileType && (section.fileType.startsWith('.jpg') || section.fileType.startsWith('.jpeg') || section.fileType.startsWith('.png') || section.fileType.startsWith('.gif') || section.fileType.startsWith('.webp')) ? (
+                        <div className="flex flex-col items-start gap-2">
+                          <p className="text-sm font-medium text-indigo-700 truncate" title={section.name}>
+                            {section.name || 'Image Attachment'}
+                          </p>
+                          <img
+                            src={getAttachmentUrl(section.fileUrl)}
+                            alt={section.name || 'Image attachment'}
+                            className="rounded-lg border border-gray-300 bg-gray-100 max-w-md max-h-80 cursor-pointer object-contain transition-transform duration-200 hover:scale-105 shadow-md"
+                            onClick={() => setImageModal({ open: true, src: getAttachmentUrl(section.fileUrl), alt: section.name || 'Image attachment' })}
+                          />
+                        </div>
+                      /* VIDEO RENDERING - MODIFIED */
+                      ) : section.fileType && section.fileType.startsWith('.mp4') ? (
+                        <div className="flex flex-col items-start gap-2">
+                          <p className="text-sm font-medium text-indigo-700 truncate" title={section.name}>
+                            {section.name || 'Video Attachment'}
+                          </p>
+                          <video controls className="rounded-lg border border-gray-300 bg-gray-100 w-full max-w-md max-h-80 mt-1">
+                            <source src={getAttachmentUrl(section.fileUrl)} type="video/mp4" />
+                            Your browser does not support the video tag.
+                          </video>
+                        </div>
+                      /* PDF RENDERING - Kept as is */
+                      ) : section.fileType === '.pdf' ? (
+                        <a href={getAttachmentUrl(section.fileUrl)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-2 rounded-md hover:bg-indigo-50 transition-colors duration-150 group">
+                          <FiFileText size={36} className="text-red-500 flex-shrink-0 group-hover:text-red-600" />
+                          <div className="flex-grow">
+                            <p className="text-sm font-medium text-gray-800 group-hover:text-indigo-700 truncate" title={section.name}>{section.name || 'PDF Document'}</p>
+                            <span className="text-xs text-gray-500 group-hover:text-indigo-500">Open PDF in new tab</span>
+                          </div>
+                          <FiExternalLink size={20} className="text-gray-400 group-hover:text-indigo-600 ml-auto" />
+                        </a>
+                      /* OTHER FILES RENDERING - Kept as is */
+                      ) : (
+                        <a href={getAttachmentUrl(section.fileUrl)} download={section.name || 'download'} className="flex items-center gap-3 p-2 rounded-md hover:bg-indigo-50 transition-colors duration-150 group">
+                          <FiFileText size={36} className="text-gray-500 flex-shrink-0 group-hover:text-indigo-600" />
+                          <div className="flex-grow">
+                            <p className="text-sm font-medium text-gray-800 group-hover:text-indigo-700 truncate" title={section.name}>{section.name || 'File Attachment'}</p>
+                            <span className="text-xs text-gray-500 group-hover:text-indigo-500">Download file</span>
+                          </div>
+                          <FiDownload size={20} className="text-gray-400 group-hover:text-indigo-600 ml-auto" />
+                        </a>
+                      )}
+                    </div>
+                  ) : null}
                 </div>
-              ) : null}
+              ))}
             </div>
-          ))}
-        </div>
-        <div className="flex gap-4 mt-3 text-indigo-600 text-sm font-medium items-center"> {/* Changed text color */}
-          <button onClick={handleLike} className={`flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-indigo-100 transition-colors ${comment.likes?.includes(userId) ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600 hover:text-indigo-600'}`}><FiThumbsUp />{comment.likes?.length || 0}</button> {/* Changed colors */}
-          <button onClick={handleDislike} className={`flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-indigo-100 transition-colors ${comment.dislikes?.includes(userId) ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600 hover:text-indigo-600'}`}><FiThumbsDown />{comment.dislikes?.length || 0}</button> {/* Changed colors */}
-          <button onClick={() => setShowReply(v => !v)} className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-indigo-100 text-gray-600 hover:text-indigo-600 transition-colors"><FiMessageCircle />Reply</button> {/* Changed colors */}
-        </div>
-        {showReply && (
+
+            <div className="flex gap-4 mt-3 text-indigo-600 text-sm font-medium items-center"> {/* Changed text color */}
+              <button onClick={handleLike} className={`flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-indigo-100 transition-colors ${comment.likes?.includes(userId) ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600 hover:text-indigo-600'}`}><FiThumbsUp />{comment.likes?.length || 0}</button> {/* Changed colors */}
+              <button onClick={handleDislike} className={`flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-indigo-100 transition-colors ${comment.dislikes?.includes(userId) ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600 hover:text-indigo-600'}`}><FiThumbsDown />{comment.dislikes?.length || 0}</button> {/* Changed colors */}
+              <button onClick={() => setShowReply(v => !v)} className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-indigo-100 text-gray-600 hover:text-indigo-600 transition-colors"><FiMessageCircle />Reply</button> {/* Changed colors */}
+            </div>
+          </>
+        )}
+
+        {!showEdit && showReply && (
           <div className="mt-3 animate-fade-in-down">
             <CommentForm
               discussionId={comment.discussion}
@@ -183,7 +267,7 @@ function CommentItem({ comment, depth, onRefresh, userId, discussionAuthorId, se
             />
           </div>
         )}
-        {comment.replies && comment.replies.length > 0 && (
+        {!showEdit && comment.replies && comment.replies.length > 0 && (
           <div className="mt-2">
             {comment.replies.map(reply => (
               <CommentItem
@@ -199,34 +283,6 @@ function CommentItem({ comment, depth, onRefresh, userId, discussionAuthorId, se
           </div>
         )}
       </div>
-      {isAuthor && (
-        <div className="absolute top-3 right-3 z-50">
-          <button
-            onClick={() => setShowMenu(v => !v)}
-            className="p-1 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 shadow transition-transform duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 z-50" // Changed colors
-            aria-label="Show comment actions"
-            style={{ position: 'relative', zIndex: 50 }}
-          >
-            <FiMoreHorizontal size={20} />
-          </button>
-          {showMenu && (
-            <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-300 rounded-xl shadow-lg animate-fade-in z-50" style={{ zIndex: 50 }}> {/* Changed background and border */}
-              <button
-                onClick={() => { setShowEdit(true); setShowMenu(false); }}
-                className="w-full flex items-center gap-2 px-4 py-2 text-indigo-700 hover:bg-indigo-50 transition-colors rounded-t-xl" // Changed colors
-              >
-                <FiEdit2 /> Edit
-              </button>
-              <button
-                onClick={() => { setShowMenu(false); handleDelete(); }}
-                className="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 transition-colors rounded-b-xl" // Changed colors
-              >
-                <FiTrash2 /> Delete
-              </button>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }

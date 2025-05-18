@@ -65,3 +65,64 @@ exports.resetPassword = async (req, res) => {
     res.status(500).json({ msg: 'Server error', error: err.message })
   }
 }
+
+// ADMIN: Get all users
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select('-password')
+    res.json({ users })
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error', error: err.message })
+  }
+}
+
+// ADMIN: Update user by ID
+exports.updateUser = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { name, email, password, role } = req.body
+    const update = {}
+    if (name) update.name = name
+    if (email) update.email = email
+    if (role) update.role = role
+    if (password) {
+      const bcrypt = require('bcryptjs')
+      const salt = await bcrypt.genSalt(10)
+      update.password = await bcrypt.hash(password, salt)
+    }
+    const user = await User.findByIdAndUpdate(id, update, { new: true, runValidators: true }).select('-password')
+    if (!user) return res.status(404).json({ msg: 'User not found' })
+    res.json({ msg: 'User updated', user })
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error', error: err.message })
+  }
+}
+
+// ADMIN: Delete user by ID
+exports.deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params
+    const user = await User.findByIdAndDelete(id)
+    if (!user) return res.status(404).json({ msg: 'User not found' })
+    res.json({ msg: 'User deleted' })
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error', error: err.message })
+  }
+}
+
+// ADMIN: Add user
+exports.addUser = async (req, res) => {
+  try {
+    const { name, email, password, role } = req.body
+    if (!name || !email || !password || !role) return res.status(400).json({ msg: 'All fields required' })
+    const exists = await User.findOne({ email })
+    if (exists) return res.status(400).json({ msg: 'Email already exists' })
+    const bcrypt = require('bcryptjs')
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash(password, salt)
+    const user = await User.create({ name, email, password: hashedPassword, role })
+    res.status(201).json({ msg: 'User created', user: { ...user.toObject(), password: undefined } })
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error', error: err.message })
+  }
+}

@@ -34,19 +34,30 @@ export default function LessonPage() {
           try {
             const jwt = JSON.parse(atob(token.split('.')[1]));
             userId = jwt.id;
-          } catch (e) {}
+          } catch (e) { console.error("LessonPage: useEffect - Error parsing JWT", e); }
           // Always compare as string
           const userProgress = lessonData.progress.find(
             p => p.student && String(p.student) === String(userId)
           );
-          if (userProgress && Array.isArray(userProgress.completedSteps)) {
-            completed = userProgress.completedSteps
-              .map(sid => stepIds.indexOf(sid))
-              .filter(idx => idx !== -1);
+
+          if (userProgress) {
+            console.log(`LessonPage: useEffect - Found userProgress for student ${userId} in lesson ${lessonData.title}:`, userProgress);
+            if (Array.isArray(userProgress.completedSteps)) {
+              console.log(`LessonPage: useEffect - Backend completedSteps (stepIds) for lesson ${lessonData.title}:`, userProgress.completedSteps);
+              completed = userProgress.completedSteps
+                .map(sid => stepIds.indexOf(sid))
+                .filter(idx => idx !== -1);
+              console.log(`LessonPage: useEffect - Mapped to completedIndexes for lesson ${lessonData.title}:`, completed);
+            } else {
+              console.log(`LessonPage: useEffect - userProgress.completedSteps is not an array for lesson ${lessonData.title}:`, userProgress.completedSteps);
+            }
+          } else {
+            console.log(`LessonPage: useEffect - No userProgress found for student ${userId} in lesson ${lessonData.title}`);
           }
         }
         setCompletedSteps(completed);
-      } catch {
+      } catch (err) { // Added err parameter
+        console.error('LessonPage: useEffect - Error fetching lesson:', err); // Log error
         setLesson(null);
       } finally {
         setLoading(false);
@@ -92,8 +103,11 @@ export default function LessonPage() {
   )
 
   // Save progress to backend
-  const saveProgress = async (newCompletedSteps) => {
+  const saveProgress = async (newCompletedStepsIndexes) => { // Renamed for clarity
     const token = localStorage.getItem('token');
+    const completedStepIdsToSend = newCompletedStepsIndexes.map(idx => steps[idx]?.stepId).filter(Boolean);
+    console.log('LessonPage: saveProgress - Sending completedStepIds:', completedStepIdsToSend, 'for lessonId:', lessonId);
+
     try {
       const res = await fetch(`http://localhost:5000/api/course/${courseId}/lesson/${lessonId}/progress`, {
         method: 'POST',
@@ -101,15 +115,59 @@ export default function LessonPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ completedSteps: newCompletedSteps.map(idx => steps[idx]?.stepId).filter(Boolean) })
+        body: JSON.stringify({ completedSteps: completedStepIdsToSend })
       });
-      if (!res.ok) throw new Error('Failed to save progress');
+
+      console.log('LessonPage: saveProgress - Response status:', res.status);
+      // Try to parse JSON regardless of res.ok, but handle errors
+      let responseData = null;
+      try {
+        responseData = await res.json();
+        console.log('LessonPage: saveProgress - Response data:', responseData);
+      } catch (jsonError) {
+        console.error('LessonPage: saveProgress - Could not parse JSON response. Status:', res.status, jsonError);
+        // If response is not JSON, log as text if possible
+        if (!res.ok) {
+            try {
+                const textResponse = await res.text();
+                console.error('LessonPage: saveProgress - Non-JSON error response text:', textResponse);
+            } catch (textError) {
+                console.error('LessonPage: saveProgress - Could not read error response text:', textError);
+            }
+        }
+      }
+
+      if (!res.ok) {
+        console.error('LessonPage: saveProgress - Failed to save progress. Status:', res.status, 'Response Data:', responseData);
+        throw new Error(`Failed to save progress. Status: ${res.status}`);
+      }
+      
       setLoading(true); // trigger re-fetch
       return true;
     } catch (err) {
-      alert('Could not save progress. Please try again.');
+      console.error('LessonPage: saveProgress - Error during save:', err);
+      // Avoid showing alert if responseData contains a message, otherwise use generic
+      const errorMessage = err.message || 'Could not save progress. Please try again.';
+      alert(errorMessage);
       return false;
     }
+  };
+
+  const handleGoBackToLessons = () => {
+    if (!courseId) {
+      console.error("LessonPage.jsx: CRITICAL - courseId is undefined. Cannot navigate back correctly.");
+      // Potentially navigate to a generic student dashboard or error page if courseId is missing
+      navigate('/student/dashboard', { state: { error: 'courseId missing' } }); // Example fallback
+      return;
+    }
+    const targetPath = `/student/course/${courseId}`;
+    const navigationOptions = { state: { refreshCourse: true, timestamp: Date.now() } }; // Added timestamp
+    
+    console.log('LessonPage.jsx: --- NAVIGATING NOW ---');
+    console.log('LessonPage.jsx: Target Path:', targetPath);
+    console.log('LessonPage.jsx: Navigation Options:', JSON.parse(JSON.stringify(navigationOptions)));
+    
+    navigate(targetPath, navigationOptions);
   };
 
   return (
@@ -118,7 +176,7 @@ export default function LessonPage() {
       <aside className="w-full md:w-72 mb-6 md:mb-0 bg-white p-6 rounded-xl shadow-lg border border-slate-200 flex-shrink-0">
         <button
           className="flex items-center gap-2 mb-5 text-sky-600 hover:text-sky-700 font-medium text-sm transition-colors"
-          onClick={() => navigate(`/student/course/${courseId}`)}
+          onClick={handleGoBackToLessons} // Use the new handler
         >
           <ArrowLeft className="w-4 h-4" /> Go Back to Lessons
         </button>
@@ -177,19 +235,37 @@ export default function LessonPage() {
           </div>
         )}
         {/* Mark as complete button */}
-        {!completedSteps.includes(activeStep) && (
+        {!completedSteps.includes(activeStep) && steps.length > 0 && (
           <button
             className="mt-6 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
             onClick={async () => {
-              const newCompleted = [...completedSteps, activeStep];
-              const ok = await saveProgress(newCompleted);
-              if (ok) setCompletedSteps(newCompleted);
+              const newCompletedStepIndexes = [...completedSteps, activeStep];
+              const ok = await saveProgress(newCompletedStepIndexes);
+              if (ok) {
+                setCompletedSteps(newCompletedStepIndexes);
+              }
             }}
           >
             Mark as Complete
           </button>
         )}
-        {allCompleted && (
+        {/* Unmark as complete button */}
+        {completedSteps.includes(activeStep) && steps.length > 0 && ( // MODIFIED: Removed !allCompleted condition
+          <button
+            className="mt-6 bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            onClick={async () => {
+              const newCompletedStepIndexes = completedSteps.filter(idx => idx !== activeStep);
+              const ok = await saveProgress(newCompletedStepIndexes);
+              if (ok) {
+                setCompletedSteps(newCompletedStepIndexes);
+              }
+            }}
+          >
+            Unmark Step
+          </button>
+        )}
+
+        {allCompleted && steps.length > 0 && ( // Added steps.length > 0
           <div className="mt-6 text-green-600 font-bold text-base flex items-center gap-2">
             <CheckCircle className="w-5 h-5" /> All steps completed!
           </div>

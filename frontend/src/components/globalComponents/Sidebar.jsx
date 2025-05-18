@@ -27,7 +27,6 @@ export default function Sidebar({ open = false, setOpen }) {
     localStorage.removeItem('user')
     if (typeof logout === 'function') logout()
     navigate('/login', { replace: true })
-    window.location.reload()
   }
 
   // Responsive sidebar classes

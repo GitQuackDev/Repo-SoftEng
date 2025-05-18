@@ -5,13 +5,14 @@ const auth = require('../middleware/authMiddleware')
 const upload = require('../middleware/upload')
 
 // Professor: CRUD for submission items
-router.post('/', submissionController.createSubmission)
-router.get('/course/:courseId', submissionController.getSubmissionsByCourse)
-router.put('/:id', submissionController.updateSubmission)
-router.delete('/:id', submissionController.deleteSubmission)
+router.post('/', auth, submissionController.createSubmission) // Added auth
+router.get('/course/:courseId', auth, submissionController.getSubmissionsByCourse) // Added auth
+router.get('/:id', auth, submissionController.getSubmissionById) // New route to get a single submission by ID
+router.put('/:id', auth, submissionController.updateSubmission) // Added auth
+router.delete('/:id', auth, submissionController.deleteSubmission) // Added auth
 
 // Professor: Grade a student's submission
-router.put('/:id/grade/:studentId', submissionController.gradeStudentSubmission)
+router.put('/:id/grade/:studentId', auth, submissionController.gradeStudentSubmission) // Added auth
 
 // Get all submissions for a student in a course
 router.get('/course/:courseId/student', auth, submissionController.getStudentSubmissions)

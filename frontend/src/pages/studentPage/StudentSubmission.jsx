@@ -8,22 +8,45 @@ export default function StudentSubmission({ course }) {
   const user = JSON.parse(localStorage.getItem('user'))
 
   useEffect(() => {
-    if (!course?._id) return
-    setLoading(true)
-    fetch(`http://localhost:5000/api/submission/course/${course._id}`)
+    if (!course?._id) {
+      setLoading(false);
+      setAssignments([]);
+      return;
+    }
+    setLoading(true);
+    const token = localStorage.getItem('token'); // Get token
+
+    fetch(`http://localhost:5000/api/submission/course/${course._id}`, {
+      headers: { // Add headers object
+        'Authorization': `Bearer ${token}` // Include Authorization header
+      }
+    })
       .then(async res => {
-        if (!res.ok || !res.headers.get('content-type')?.includes('application/json')) return []
-        return res.json()
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({ message: `Server error: ${res.status}` }));
+          console.error('Error response from server:', errorData);
+          throw new Error(errorData.message || `Failed to fetch assignments. Status: ${res.status}`);
+        }
+        if (!res.headers.get('content-type')?.includes('application/json')) {
+          console.error('Unexpected content type:', res.headers.get('content-type'));
+          throw new Error('Received non-JSON response from server.');
+        }
+        return res.json();
       })
       .then(assignmentsData => {
-        setAssignments(Array.isArray(assignmentsData) ? assignmentsData : [])
+        setAssignments(Array.isArray(assignmentsData) ? assignmentsData : []);
       })
-      .finally(() => setLoading(false))
+      .catch(error => { // Catch and log errors
+        console.error("Failed to fetch assignments for course:", course._id, error);
+        setAssignments([]); // Clear assignments on error
+        // Optionally, set an error state here to display to the user
+      })
+      .finally(() => setLoading(false));
   }, [course])
 
   if (loading) return <div className="p-6 text-base text-slate-500 font-sans">Loading submissions...</div>
   if (selectedAssignment) {
-    return <StudentSubmissionDetail assignment={selectedAssignment} user={user} onBack={() => setSelectedAssignment(null)} />
+    return <StudentSubmissionDetail submissionId={selectedAssignment._id} user={user} onBack={() => setSelectedAssignment(null)} />
   }
   return (
     <div className="p-6 md:p-8 max-w-3xl mx-auto font-sans">

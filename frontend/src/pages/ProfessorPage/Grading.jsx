@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 
 export default function Grading({ courseId }) {
   const [assignments, setAssignments] = useState([])
-  const [submissions, setSubmissions] = useState([])
+  const [courseAssignmentsData, setCourseAssignmentsData] = useState([]) // Renamed from submissions
   const [selectedAssignment, setSelectedAssignment] = useState('')
   const [search, setSearch] = useState('')
   const [grading, setGrading] = useState(null)
@@ -16,34 +16,44 @@ export default function Grading({ courseId }) {
     setLoading(true)
     setError('')
     const token = localStorage.getItem('token')
-    // Fetch all submission items (assignments/quizzes)
-    fetch(`http://localhost:5000/api/submission/course/${courseId}`)
-      .then(res => res.json())
-      .then(data => {
-        setAssignments(Array.isArray(data) ? data : [])
-        setSelectedAssignment(data[0]?._id || '')
+
+    fetch(`http://localhost:5000/api/submission/course/${courseId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(errData => { throw new Error(errData.error || `Failed to load data (status: ${res.status})`) });
+        }
+        return res.json();
       })
-      .catch(() => setError('Failed to load assignments'))
-    // Fetch all student submissions for this course
-    fetch(`http://localhost:5000/api/submission/course/${courseId}`)
-      .then(res => res.json())
-      .then(data => setSubmissions(Array.isArray(data) ? data : []))
-      .catch(() => setError('Failed to load submissions'))
+      .then(data => {
+        const assignmentsArray = Array.isArray(data) ? data : [];
+        setAssignments(assignmentsArray); // For the dropdown
+        setCourseAssignmentsData(assignmentsArray); // For the table data source
+        // Set initial selected assignment only if not already set by user or previous render
+        if (assignmentsArray.length > 0 && !selectedAssignment) {
+          setSelectedAssignment(assignmentsArray[0]._id);
+        } else if (assignmentsArray.length === 0) {
+          setSelectedAssignment('');
+        }
+      })
+      .catch(err => {
+        console.error("Error fetching course assignments:", err);
+        setError(err.message || 'Failed to load assignments data.');
+        setAssignments([]);
+        setCourseAssignmentsData([]);
+      })
       .finally(() => setLoading(false))
-  }, [courseId])
+  }, [courseId]) // selectedAssignment removed from dependencies
 
   // Flatten all student submissions for the selected assignment
-  const filteredSubs = submissions
+  const filteredSubs = courseAssignmentsData // Use new state name
     .filter(a => a._id === selectedAssignment)
     .flatMap(a => (a.submissions || []).map(s => ({
       ...s,
-      studentName: s.student?.name || s.student?.email || s.student, // Use name if available
-      fileUrl: s.fileUrl,
-      status: s.status,
-      grade: s.grade,
-      feedback: s.feedback,
-      id: s._id,
-      submittedAt: s.submittedAt,
+      studentId: String(s.student?._id || s.student), // Ensure studentId is a string
+      studentName: s.student?.name || s.student?.email || String(s.student?._id || s.student), // Robust student name
+      id: s._id, // This is student submission's _id
     })))
     .filter(s => !search || (s.studentName && s.studentName.toLowerCase().includes(search.toLowerCase())))
 
@@ -59,17 +69,41 @@ export default function Grading({ courseId }) {
   }
   const handleGrade = async (e) => {
     e.preventDefault()
-    if (!grading) return
+    if (!grading || !grading.studentId) {
+        setError('Cannot save grade: missing student information.');
+        return;
+    }
     const token = localStorage.getItem('token')
+    setLoading(true); 
+    setError('');
     try {
-      await fetch(`http://localhost:5000/api/submission/${selectedAssignment}/grade/${grading.student?._id || grading.student}`, {
+      await fetch(`http://localhost:5000/api/submission/${selectedAssignment}/grade/${grading.studentId}`, { // Use grading.studentId
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ grade: gradeVal, feedback: feedbackVal })
       })
       closeGrading()
-      // Optionally, refresh submissions here
-    } catch {}
+
+      // Refresh data
+      const refreshRes = await fetch(`http://localhost:5000/api/submission/course/${courseId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!refreshRes.ok) {
+        const errData = await refreshRes.json().catch(() => ({}));
+        throw new Error(errData.error || `Failed to refresh submissions (status: ${refreshRes.status})`);
+      }
+      const refreshedData = await refreshRes.json();
+      const refreshedAssignmentsArray = Array.isArray(refreshedData) ? refreshedData : [];
+      setCourseAssignmentsData(refreshedAssignmentsArray);
+      // Also update assignments for the dropdown if necessary, though it might not change often.
+      setAssignments(refreshedAssignmentsArray);
+
+    } catch (err) {
+      console.error("Error in handleGrade:", err);
+      setError(err.message || 'Failed to save grade or refresh data.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -115,7 +149,7 @@ export default function Grading({ courseId }) {
       {grading && (
         <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center z-50">
           <form onSubmit={handleGrade} className="bg-white p-8 rounded-xl shadow-xl w-full max-w-md border border-gray-300">
-            <div className="text-xl font-bold text-indigo-700 mb-4">Grade Submission: {grading.student?.name || grading.student?.email || grading.student}</div>
+            <div className="text-xl font-bold text-indigo-700 mb-4">Grade Submission: {grading.studentName}</div>
             <div className="mb-3">
               <label className="block text-indigo-700 mb-1">Grade</label>
               <input type="number" min="0" max="100" value={gradeVal} onChange={e => setGradeVal(e.target.value)} required className="w-full px-3 py-2 rounded bg-gray-50 text-gray-800 border border-gray-300" />

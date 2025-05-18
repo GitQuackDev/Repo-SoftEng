@@ -22,11 +22,6 @@ router.put('/comments/:id', auth, commentController.editComment);
 router.delete('/comments/:id', auth, commentController.deleteComment);
 router.post('/comments/:id/like', auth, commentController.likeComment);
 router.post('/comments/:id/dislike', auth, commentController.dislikeComment);
-// Add RESTful route for creating a comment under a discussion
-router.post('/discussions/:discussionId/comments', auth, (req, res, next) => {
-    req.body.discussionId = req.params.discussionId;
-    commentController.createComment(req, res, next);
-});
 
 // File upload (for discussion/comment sections)
 router.post('/upload', auth, upload.single('file'), fileUploadController.uploadFile);

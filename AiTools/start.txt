@@ -7,3 +7,11 @@ uvicorn main:app --reload
 
 pip install fastapi uvicorn
 pip install tensorflow numpy pillow
+
+==
+if cant run the uviocorn
+
+Remove-Item -Recurse -Force .\venv
+python -m venv venv
+.\venv\Scripts\Activate
+pip install fastapi uvicorn tensorflow numpy pillow

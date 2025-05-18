@@ -4,10 +4,13 @@ const fs = require('fs');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // Save forum uploads in uploads/discussion, others in uploads/banners
-    let dest = 'uploads/banners/';
+    let dest = 'uploads/general/'; // Default path for non-specific uploads
     if (req.baseUrl && req.baseUrl.includes('discussion-forum')) {
       dest = 'uploads/discussion/';
+    } else if (req.baseUrl && req.baseUrl.includes('submission')) { // Specific path for submissions
+      dest = 'uploads/submissions/';
+    } else if (req.baseUrl && req.baseUrl.includes('course') && req.path && req.path.includes('banner')) { // Specific path for course banners
+      dest = 'uploads/banners/';
     }
     if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
     cb(null, dest);

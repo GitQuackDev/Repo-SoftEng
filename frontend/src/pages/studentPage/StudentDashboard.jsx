@@ -4,7 +4,25 @@ import { Flame, CheckCircle, BarChart3, PieChart as PieIcon, TrendingUp } from '
 import { useMemo } from 'react'
 
 export default function StudentDashboard({ course }) {
-  const user = JSON.parse(localStorage.getItem('user'))
+  const user = JSON.parse(localStorage.getItem('user')) || {}
+  // Derive the correct user ID (handle both ._id and .id)
+  const userId = String(user._id || user.id || '')
+
+  // Helper to get progress entry for current user
+  const getProgress = (lesson) => {
+    if (!Array.isArray(lesson.progress)) return null;
+    return lesson.progress.find(p => {
+      if (!p.student) return false;
+      let sid;
+      if (typeof p.student === 'object') {
+        sid = p.student._id ? p.student._id : p.student.toString();
+      } else {
+        sid = p.student;
+      }
+      return String(sid) === userId;
+    });
+  };
+
   const grades = course?.grades || []
   const myGrade = grades.find(g => g.student?._id === user?._id)
   const attendance = course?.attendance || []
@@ -29,40 +47,38 @@ export default function StudentDashboard({ course }) {
   // --- Fix Lesson Completion Logic ---
   const completedLessons = lessons.filter(lesson => {
     if (!lesson.open) return false;
-    const progress = Array.isArray(lesson.progress)
-      ? lesson.progress.find(p => p.student && String(p.student) === String(user._id))
-      : null;
+    const progress = getProgress(lesson);
     const totalSteps = lesson.actionSteps?.map(step => step.stepId) || [];
     const completedSteps = progress?.completedSteps || [];
 
     // Debugging: Log comparison of actionSteps and completedSteps
-    console.log(`Lesson: ${lesson.title}`);
-    console.log('Action Steps:', totalSteps);
-    console.log('Completed Steps:', completedSteps);
+    // console.log(`Lesson: ${lesson.title}`);
+    // console.log('Action Steps:', totalSteps);
+    // console.log('Completed Steps:', completedSteps);
+    console.log('Comparing for lesson:', lesson.title, 'Total Step IDs:', totalSteps, 'Student Completed Step IDs:', completedSteps);
 
-    return totalSteps.length > 0 && totalSteps.every(stepId => completedSteps.includes(stepId)); // Ensure all steps are marked as complete
+    return totalSteps.length > 0 && totalSteps.every(stepId => completedSteps.includes(stepId));
   });
 
   const incompleteLessons = lessons.filter(lesson => {
     if (!lesson.open) return false;
-    const progress = Array.isArray(lesson.progress)
-      ? lesson.progress.find(p => p.student && String(p.student) === String(user._id))
-      : null;
+    const progress = getProgress(lesson);
     const totalSteps = lesson.actionSteps?.map(step => step.stepId) || [];
     const completedSteps = progress?.completedSteps || [];
 
     // Debugging: Log comparison of actionSteps and completedSteps
-    console.log(`Lesson: ${lesson.title}`);
-    console.log('Action Steps:', totalSteps);
-    console.log('Completed Steps:', completedSteps);
+    // console.log(`Lesson: ${lesson.title}`);
+    // console.log('Action Steps:', totalSteps);
+    // console.log('Completed Steps:', completedSteps);
+    console.log('Comparing for incomplete lesson:', lesson.title, 'Total Step IDs:', totalSteps, 'Student Completed Step IDs:', completedSteps);
 
-    return totalSteps.length > 0 && !totalSteps.every(stepId => completedSteps.includes(stepId)); // Ensure not all steps are marked as complete
+    return totalSteps.length > 0 && !totalSteps.every(stepId => completedSteps.includes(stepId));
   });
 
   // Debugging: Log lesson data for verification
-  console.log('Lessons:', lessons);
-  console.log('Completed Lessons:', completedLessons);
-  console.log('Incomplete Lessons:', incompleteLessons);
+  // console.log('Lessons:', lessons);
+  // console.log('Completed Lessons:', completedLessons);
+  // console.log('Incomplete Lessons:', incompleteLessons);
 
   // --- Steps Completed Per Day (last 7 days) ---
   const stepsPerDay = useMemo(() => {
@@ -73,9 +89,7 @@ export default function StudentDashboard({ course }) {
       map[d.toISOString().slice(0,10)] = 0
     }
     lessons.forEach(lesson => {
-      const progress = Array.isArray(lesson.progress)
-        ? lesson.progress.find(p => p.student && String(p.student) === String(user._id))
-        : null
+      const progress = getProgress(lesson);
       if (progress && Array.isArray(progress.completedSteps) && progress.lastStepCompletionDate) {
         let last = new Date(progress.lastStepCompletionDate); last.setHours(0,0,0,0)
         const key = last.toISOString().slice(0,10)
@@ -83,7 +97,7 @@ export default function StudentDashboard({ course }) {
       }
     })
     return Object.entries(map).map(([date, count]) => ({ date, count }))
-  }, [lessons, user._id])
+  }, [lessons, userId])
 
   // --- Streak History (simulate for demo) ---
   const streakHistory = useMemo(() => {
@@ -112,9 +126,7 @@ export default function StudentDashboard({ course }) {
   let maxStreak = 0;
   let activeStreak = 0;
   lessons.forEach(lesson => {
-    const progress = Array.isArray(lesson.progress)
-      ? lesson.progress.find(p => p.student && String(p.student) === String(user._id))
-      : null;
+    const progress = getProgress(lesson);
     if (progress && progress.streak) {
       let last = progress.lastStepCompletionDate ? new Date(progress.lastStepCompletionDate) : null;
       if (last) last.setHours(0,0,0,0);
