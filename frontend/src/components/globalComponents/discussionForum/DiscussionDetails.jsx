@@ -29,7 +29,7 @@ export default function DiscussionDetails() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/discussion-forum/discussions/${id}`)
+    fetch(`${API}/api/discussion-forum/discussions/${id}`)
       .then(res => res.json())
       .then(data => {
         setDiscussion(data);
@@ -39,27 +39,27 @@ export default function DiscussionDetails() {
   }, [id]);
 
   const handleLike = async () => {
-    await fetch(`/api/discussion-forum/discussions/${id}/like`, {
+    await fetch(`${API}/api/discussion-forum/discussions/${id}/like`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     });
     // Instead of window.location.reload(), just refetch the discussion
-    fetch(`/api/discussion-forum/discussions/${id}`)
+    fetch(`${API}/api/discussion-forum/discussions/${id}`)
       .then(res => res.json())
       .then(data => setDiscussion(data));
   };
   const handleDislike = async () => {
-    await fetch(`/api/discussion-forum/discussions/${id}/dislike`, {
+    await fetch(`${API}/api/discussion-forum/discussions/${id}/dislike`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     });
-    fetch(`/api/discussion-forum/discussions/${id}`)
+    fetch(`${API}/api/discussion-forum/discussions/${id}`)
       .then(res => res.json())
       .then(data => setDiscussion(data));
   };
   const handleDelete = async () => {
     if (!window.confirm('Delete this discussion?')) return;
-    await fetch(`/api/discussion-forum/discussions/${id}`, {
+    await fetch(`${API}/api/discussion-forum/discussions/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     });
@@ -79,7 +79,7 @@ export default function DiscussionDetails() {
           editMode
           discussionId={discussion._id}
           initialData={discussion}
-          onSuccess={() => { setEditing(false); setRefreshComments(r => !r); setLoading(true); fetch(`/api/discussion-forum/discussions/${id}`).then(res => res.json()).then(data => { setDiscussion(data); setLoading(false); }); }}
+          onSuccess={() => { setEditing(false); setRefreshComments(r => !r); setLoading(true); fetch(`${API}/api/discussion-forum/discussions/${id}`).then(res => res.json()).then(data => { setDiscussion(data); setLoading(false); }); }}
         />
       </div>
     );
