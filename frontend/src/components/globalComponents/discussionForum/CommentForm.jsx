@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AlertTriangle, Loader2, Send, Paperclip, XCircle, Save } from 'lucide-react'; // Added Save icon
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function CommentForm({
   discussionId,
   onSuccess,
@@ -113,7 +115,7 @@ export default function CommentForm({
       if (selectedFile) {
         const formData = new FormData();
         formData.append('file', selectedFile);
-        const uploadResponse = await fetch('/api/discussion-forum/upload', {
+        const uploadResponse = await fetch(`${API}/api/discussion-forum/upload`, {
           method: 'POST',
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
           body: formData,
@@ -154,7 +156,7 @@ export default function CommentForm({
          return;
       }
 
-      const apiEndpoint = isEditMode ? `/api/discussion-forum/comments/${commentId}` : '/api/discussion-forum/comments';
+      const apiEndpoint = isEditMode ? `${API}/api/discussion-forum/comments/${commentId}` : `${API}/api/discussion-forum/comments`;
       const method = isEditMode ? 'PUT' : 'POST';
 
       const body = isEditMode 

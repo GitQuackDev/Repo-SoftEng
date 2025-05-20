@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiThumbsUp, FiThumbsDown } from 'react-icons/fi';
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function DiscussionList({ refresh }) {
   const [discussions, setDiscussions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -9,7 +11,7 @@ export default function DiscussionList({ refresh }) {
 
   useEffect(() => {
     setLoading(true);
-    fetch('/api/discussion-forum/discussions')
+    fetch(`${API}/api/discussion-forum/discussions`)
       .then(res => res.json())
       .then(data => {
         setDiscussions(data);

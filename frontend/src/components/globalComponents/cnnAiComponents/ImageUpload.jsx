@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { X, ImageIcon, AlertTriangle, Loader2, UploadCloud } from 'lucide-react'
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function ImageUpload({ onUpload, onRemove, initialImage, onImageChange }) {
   const [image, setImage] = useState(null)
   const [preview, setPreview] = useState(initialImage || null)
@@ -45,7 +47,7 @@ export default function ImageUpload({ onUpload, onRemove, initialImage, onImageC
     formData.append('image', image)
 
     try {
-      const response = await fetch('/api/cnn-ai/upload', {
+      const response = await fetch(`${API}/api/cnn-ai/upload`, {
         method: 'POST',
         body: formData,
         headers: {

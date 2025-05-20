@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import FetchedInformation from '../../components/globalComponents/cnnAiComponents/FetchedInformation'
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function CnnAi() {
   const [selectedFile, setSelectedFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState(null)
@@ -29,7 +31,7 @@ export default function CnnAi() {
     try {
       const formData = new FormData()
       formData.append('file', selectedFile)
-      const res = await fetch('/api/cnn-ai/predict', {
+      const res = await fetch(`${API}/api/cnn-ai/predict`, {
         method: 'POST',
         body: formData,
       })
