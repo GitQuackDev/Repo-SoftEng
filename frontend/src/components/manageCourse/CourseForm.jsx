@@ -1,10 +1,12 @@
 import { useState } from 'react'
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function CourseForm({ course = {}, onSave, onCancel, loading, error }) {
   const [name, setName] = useState(course.name || '')
   const [details, setDetails] = useState(course.details || '')
   const [banner, setBanner] = useState(null)
-  const [bannerPreview, setBannerPreview] = useState(course.banner ? `http://localhost:5000${course.banner}` : null)
+  const [bannerPreview, setBannerPreview] = useState(course.banner ? `${API}${course.banner}` : null)
   const handleSubmit = e => {
     e.preventDefault()
     const formData = new FormData()

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function ProfSubmission({ courseId, refreshCourse }) {
   const [submissions, setSubmissions] = useState([])
   const [loading, setLoading] = useState(true)
@@ -14,7 +16,7 @@ export default function ProfSubmission({ courseId, refreshCourse }) {
     setLoading(true)
     setError('')
     const token = localStorage.getItem('token')
-    fetch(`http://localhost:5000/api/submission/course/${courseId}`, {
+    fetch(`${API}/api/submission/course/${courseId}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -40,8 +42,8 @@ export default function ProfSubmission({ courseId, refreshCourse }) {
     setError('')
     const token = localStorage.getItem('token')
     const url = editItem
-      ? `http://localhost:5000/api/submission/${editItem._id}`
-      : 'http://localhost:5000/api/submission/'
+      ? `${API}/api/submission/${editItem._id}`
+      : `${API}/api/submission/`
     const method = editItem ? 'PUT' : 'POST'
     const body = JSON.stringify({ ...form, course: courseId })
     try {
@@ -62,7 +64,7 @@ export default function ProfSubmission({ courseId, refreshCourse }) {
     const sub = submissions.find(s => s._id === id)
     if (!sub) return
     try {
-      await fetch(`http://localhost:5000/api/submission/${id}`, {
+      await fetch(`${API}/api/submission/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ status: sub.status === 'Open' ? 'Closed' : 'Open' })
@@ -75,7 +77,7 @@ export default function ProfSubmission({ courseId, refreshCourse }) {
     const sub = submissions.find(s => s._id === id)
     if (!sub) return
     try {
-      await fetch(`http://localhost:5000/api/submission/${id}`, {
+      await fetch(`${API}/api/submission/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ visible: !sub.visible })
@@ -87,7 +89,7 @@ export default function ProfSubmission({ courseId, refreshCourse }) {
     if (!window.confirm('Delete this submission item?')) return
     const token = localStorage.getItem('token')
     try {
-      await fetch(`http://localhost:5000/api/submission/${id}`, {
+      await fetch(`${API}/api/submission/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       })

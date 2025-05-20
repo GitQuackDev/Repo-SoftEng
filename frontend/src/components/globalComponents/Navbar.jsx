@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Menu } from 'lucide-react' // Removed Sun, Moon icons
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function Navbar({ onToggleSidebar }) {
   const [user, setUser] = useState(null)
   // Removed isDark state and related logic
@@ -41,7 +43,7 @@ export default function Navbar({ onToggleSidebar }) {
                 <span className="text-sm font-medium text-slate-700 hidden sm:inline">{user.name}</span>
                 <span className="relative w-8 h-8 rounded-full bg-sky-600 flex items-center justify-center text-white font-bold text-xs overflow-hidden border-2 border-white shadow-sm">
                   {user.avatar ? (
-                    <img src={`http://localhost:5000${user.avatar}`} alt="avatar" className="w-full h-full object-cover" />
+                    <img src={`${API}${user.avatar}`} alt="avatar" className="w-full h-full object-cover" />
                   ) : (
                     user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'JD'
                   )}

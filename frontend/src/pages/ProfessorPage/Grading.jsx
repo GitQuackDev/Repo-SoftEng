@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function Grading({ courseId }) {
   const [assignments, setAssignments] = useState([])
   const [courseAssignmentsData, setCourseAssignmentsData] = useState([]) // Renamed from submissions
@@ -17,7 +19,7 @@ export default function Grading({ courseId }) {
     setError('')
     const token = localStorage.getItem('token')
 
-    fetch(`http://localhost:5000/api/submission/course/${courseId}`, {
+    fetch(`${API}/api/submission/course/${courseId}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => {
@@ -77,7 +79,7 @@ export default function Grading({ courseId }) {
     setLoading(true); 
     setError('');
     try {
-      await fetch(`http://localhost:5000/api/submission/${selectedAssignment}/grade/${grading.studentId}`, { // Use grading.studentId
+      await fetch(`${API}/api/submission/${selectedAssignment}/grade/${grading.studentId}`, { // Use grading.studentId
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ grade: gradeVal, feedback: feedbackVal })
@@ -85,7 +87,7 @@ export default function Grading({ courseId }) {
       closeGrading()
 
       // Refresh data
-      const refreshRes = await fetch(`http://localhost:5000/api/submission/course/${courseId}`, {
+      const refreshRes = await fetch(`${API}/api/submission/course/${courseId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!refreshRes.ok) {

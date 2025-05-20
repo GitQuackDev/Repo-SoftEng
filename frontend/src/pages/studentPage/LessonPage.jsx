@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { CheckCircle, Circle, ArrowLeft } from 'lucide-react'
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function LessonPage() {
   const { courseId, lessonId } = useParams()
   const navigate = useNavigate()
@@ -16,7 +18,7 @@ export default function LessonPage() {
     const fetchLesson = async () => {
       try {
         // Fetch the course to get the latest lessons and progress
-        const courseRes = await fetch(`http://localhost:5000/api/course/${courseId}`, {
+        const courseRes = await fetch(`${API}/api/course/${courseId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const courseData = await courseRes.json();
@@ -94,7 +96,7 @@ export default function LessonPage() {
       {step.files && step.files.filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f)).map((file, idx) => (
         <img
           key={idx}
-          src={`http://localhost:5000${file}`}
+          src={`${API}${file}`}
           alt="Step resource"
           className="rounded-xl my-4 max-h-72 object-contain border border-indigo-900"
         />
@@ -109,7 +111,7 @@ export default function LessonPage() {
     console.log('LessonPage: saveProgress - Sending completedStepIds:', completedStepIdsToSend, 'for lessonId:', lessonId);
 
     try {
-      const res = await fetch(`http://localhost:5000/api/course/${courseId}/lesson/${lessonId}/progress`, {
+      const res = await fetch(`${API}/api/course/${courseId}/lesson/${lessonId}/progress`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -228,7 +230,7 @@ export default function LessonPage() {
             <ul className="space-y-1">
               {steps[activeStep].files.filter(f => !/\.(jpg|jpeg|png|gif|webp)$/i.test(f)).map((file, idx) => (
                 <li key={idx}>
-                  <a href={`http://localhost:5000${file}`} target="_blank" rel="noopener noreferrer" className="text-sky-600 hover:text-sky-700 underline text-xs font-medium">{file.split('/').pop()}</a>
+                  <a href={`${API}${file}`} target="_blank" rel="noopener noreferrer" className="text-sky-600 hover:text-sky-700 underline text-xs font-medium">{file.split('/').pop()}</a>
                 </li>
               ))}
             </ul>

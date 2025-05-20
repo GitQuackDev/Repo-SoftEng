@@ -1,6 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function StudentCourseList() {
   const navigate = useNavigate();
   const [courses, setCourses] = React.useState([]);
@@ -37,7 +39,7 @@ export default function StudentCourseList() {
             <img
               src={course.banner
                 ? course.banner.startsWith('/uploads')
-                  ? `http://localhost:5000${course.banner}`
+                  ? `${API}${course.banner}`
                   : course.banner
                 : '/default-banner.jpg'}
               alt={course.name}

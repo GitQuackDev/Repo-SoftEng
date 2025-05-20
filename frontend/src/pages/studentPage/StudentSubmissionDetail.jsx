@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function StudentSubmissionDetail({ submissionId, onBack }) {
   const [submission, setSubmission] = useState(null)
   const [loading, setLoading] = useState(true);
@@ -24,7 +26,7 @@ export default function StudentSubmissionDetail({ submissionId, onBack }) {
       setError(''); // Clear previous errors
       try {
         const token = localStorage.getItem('token')
-        const res = await fetch(`http://localhost:5000/api/submission/${submissionId}`, {
+        const res = await fetch(`${API}/api/submission/${submissionId}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (!res.ok) {
@@ -69,7 +71,7 @@ export default function StudentSubmissionDetail({ submissionId, onBack }) {
     formData.append('file', file)
     try {
       // Use submission._id (which is the assignment ID)
-      const res = await fetch(`http://localhost:5000/api/submission/${submission._id}/submit`, {
+      const res = await fetch(`${API}/api/submission/${submission._id}/submit`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData
@@ -91,7 +93,7 @@ export default function StudentSubmissionDetail({ submissionId, onBack }) {
     const token = localStorage.getItem('token')
     try {
       // Use submission._id (which is the assignment ID)
-      const res = await fetch(`http://localhost:5000/api/submission/${submission._id}/unsubmit`, {
+      const res = await fetch(`${API}/api/submission/${submission._id}/unsubmit`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       })

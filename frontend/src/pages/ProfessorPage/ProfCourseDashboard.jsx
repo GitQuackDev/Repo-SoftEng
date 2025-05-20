@@ -9,6 +9,8 @@ import { useParams } from 'react-router-dom'
 import ProfSubmission from './ProfSubmission'
 import Grading from './Grading'
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function ProfCourseDashboard() {
   const { courseId } = useParams()
   const [course, setCourse] = useState(null)
@@ -27,7 +29,7 @@ export default function ProfCourseDashboard() {
     setError('')
     const token = localStorage.getItem('token')
     try {
-      const res = await fetch(`http://localhost:5000/api/course/${courseId}`, {
+      const res = await fetch(`${API}/api/course/${courseId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -46,7 +48,7 @@ export default function ProfCourseDashboard() {
     setError('')
     const token = localStorage.getItem('token')
     // Find user by email
-    let userRes = await fetch(`http://localhost:5000/api/user/by-email`, {
+    let userRes = await fetch(`${API}/api/user/by-email`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ email })
@@ -58,7 +60,7 @@ export default function ProfCourseDashboard() {
       return
     }
     // Enroll student
-    let enrollRes = await fetch(`http://localhost:5000/api/course/${courseId}/enroll`, {
+    let enrollRes = await fetch(`${API}/api/course/${courseId}/enroll`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ studentId: userData.user._id })
@@ -78,7 +80,7 @@ export default function ProfCourseDashboard() {
     setError('')
     setEnrollMsg('')
     const token = localStorage.getItem('token')
-    let res = await fetch(`http://localhost:5000/api/course/${courseId}/enroll/${studentId}`, {
+    let res = await fetch(`${API}/api/course/${courseId}/enroll/${studentId}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     })

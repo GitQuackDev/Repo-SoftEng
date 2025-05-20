@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+const API = import.meta.env.VITE_API_URL || '';
+
 function isImage(fileName) {
   const ext = fileName.split('.').pop().toLowerCase()
   return ["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(ext)
@@ -24,7 +26,7 @@ function getFileName(file) {
 
 // Helper to get file URL for preview/download
 function getFileUrl(file) {
-  if (typeof file === 'string') return file.startsWith('/uploads') ? `http://localhost:5000${file}` : file;
+  if (typeof file === 'string') return file.startsWith('/uploads') ? `${API}${file}` : file;
   if (file instanceof File) return URL.createObjectURL(file);
   // Defensive: skip invalid file types
   return undefined;

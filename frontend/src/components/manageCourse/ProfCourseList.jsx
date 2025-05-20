@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react'
 import { BookOpen } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function ProfCourseList() {
   const [courses, setCourses] = useState([])
   useEffect(() => {
     const token = localStorage.getItem('token')
-    fetch('http://localhost:5000/api/course/professor', {
+    fetch(`${API}/api/course/professor`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())

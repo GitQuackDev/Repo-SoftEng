@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+const API = import.meta.env.VITE_API_URL || '';
 // Student's list of courses page (placeholder, replace with real content)
 export default function CourseList() {
   const [courses, setCourses] = useState([])
@@ -6,7 +7,7 @@ export default function CourseList() {
 
   useEffect(() => {
     const token = localStorage.getItem('token')
-    fetch('http://localhost:5000/api/course/student', {
+    fetch(`${API}/api/course/student`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
@@ -30,7 +31,7 @@ export default function CourseList() {
             <img
               src={course.banner
                 ? course.banner.startsWith('/uploads')
-                  ? `http://localhost:5000${course.banner}`
+                  ? `${API}${course.banner}`
                   : course.banner
                 : '/default-banner.jpg'}
               alt={course.name}

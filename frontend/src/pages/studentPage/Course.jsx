@@ -2,6 +2,8 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import StudentCoursetab from '../../components/manageCourse/StudentCoursetab'
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function Course() {
   const { id } = useParams()
   const location = useLocation()
@@ -12,7 +14,7 @@ export default function Course() {
   const fetchCourse = useCallback(() => {
     setLoading(true)
     const token = localStorage.getItem('token')
-    fetch(`http://localhost:5000/api/course/${id}`,
+    fetch(`${API}/api/course/${id}`,
       { headers: { Authorization: `Bearer ${token}` } })
       .then(res => {
         if (!res.ok) {

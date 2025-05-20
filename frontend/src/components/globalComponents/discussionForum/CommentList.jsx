@@ -3,11 +3,12 @@ import CommentForm from './CommentForm';
 import ImageModal from './ImageModal';
 import { FiThumbsUp, FiThumbsDown, FiMessageCircle, FiEdit2, FiTrash2, FiMoreHorizontal, FiFileText, FiDownload, FiImage, FiVideo, FiExternalLink } from 'react-icons/fi';
 
-const backendUrl = 'http://localhost:5000';
+const API = import.meta.env.VITE_API_URL || '';
+
 function getAttachmentUrl(fileUrl) {
   if (!fileUrl) return '';
   if (fileUrl.startsWith('http')) return fileUrl;
-  return backendUrl + fileUrl;
+  return API + fileUrl;
 }
 
 function getInitials(name, email) {
@@ -24,7 +25,7 @@ function AdvancedAvatar({ avatar, name, email, size = 36 }) {
   if (avatar) {
     return (
       <img
-        src={avatar.startsWith('http') ? avatar : backendUrl + avatar}
+        src={avatar.startsWith('http') ? avatar : API + avatar}
         alt="avatar"
         className="rounded-full object-cover"
         style={{ width: size, height: size }}

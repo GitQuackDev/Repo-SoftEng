@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
-const backendUrl = 'http://localhost:5000';
+const API = import.meta.env.VITE_API_URL || '';
+const backendUrl = API;
 
 function getInitials(name, email) {
   if (name && name.trim()) {
@@ -21,7 +22,7 @@ export default function Profile() {
   const [removing, setRemoving] = useState(false);
 
   useEffect(() => {
-    fetch('/api/user/profile', {
+    fetch(`${API}/api/user/profile`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     })
       .then(res => res.json())
@@ -57,7 +58,7 @@ export default function Profile() {
     } else if (fileInputRef.current.files[0]) {
       formData.append('avatar', fileInputRef.current.files[0]);
     }
-    const res = await fetch('/api/user/profile', {
+    const res = await fetch(`${API}/api/user/profile`, {
       method: 'PUT',
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       body: formData,

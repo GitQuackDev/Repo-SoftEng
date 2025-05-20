@@ -5,6 +5,8 @@ import { logout } from '../../auth'
 import ProfCourseList from '../manageCourse/ProfCourseList'
 import StudentCourseList from '../manageCourse/StudentCourseList'
 
+const API = import.meta.env.VITE_API_URL || ''
+
 // const courses = [
 //   { id: 'cs101', name: 'CS101', details: 'Intro to Computer Science', professor: 'Prof. Smith' },
 //   { id: 'math201', name: 'Math 201', details: 'Advanced Mathematics', professor: 'Prof. Doe' },
@@ -105,7 +107,7 @@ export default function Sidebar({ open = false, setOpen }) {
             <NavLink to="/profile" className={({ isActive }) => `flex items-center gap-3 px-6 py-3 mx-2 rounded-lg transition-all duration-200 group relative text-base font-medium focus:outline-none focus:ring-2 focus:ring-sky-500 ${isActive ? 'bg-sky-100 text-sky-700 shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-sky-700'}`}>
               <span className="relative w-7 h-7 rounded-full bg-sky-600 flex items-center justify-center text-white font-bold text-sm overflow-hidden border-2 border-white shadow-sm">
                 {user?.avatar ? (
-                  <img src={`http://localhost:5000${user.avatar}`} alt="avatar" className="w-full h-full object-cover" />
+                  <img src={`${API}${user.avatar}`} alt="avatar" className="w-full h-full object-cover" />
                 ) : (
                   user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'JD'
                 )}

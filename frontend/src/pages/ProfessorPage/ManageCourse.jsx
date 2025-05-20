@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { NavLink } from 'react-router-dom'
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function ManageCourse() {
   const [courses, setCourses] = useState([])
   const [name, setName] = useState('')
@@ -26,7 +28,7 @@ export default function ManageCourse() {
   const fetchCourses = async () => {
     const token = localStorage.getItem('token')
     try {
-      const res = await fetch('http://localhost:5000/api/course/professor', {
+      const res = await fetch(`${API}/api/course/professor`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -68,7 +70,7 @@ export default function ManageCourse() {
     if (banner) formData.append('banner', banner)
     const token = localStorage.getItem('token')
     try {
-      const res = await fetch('http://localhost:5000/api/course/professor', {
+      const res = await fetch(`${API}/api/course/professor`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -100,7 +102,7 @@ export default function ManageCourse() {
     if (!window.confirm('Are you sure you want to delete this course?')) return
     const token = localStorage.getItem('token')
     try {
-      await fetch(`http://localhost:5000/api/course/${courseId}`, {
+      await fetch(`${API}/api/course/${courseId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -123,7 +125,7 @@ export default function ManageCourse() {
     if (editCourse.bannerFile) formData.append('banner', editCourse.bannerFile)
     const token = localStorage.getItem('token')
     try {
-      const res = await fetch(`http://localhost:5000/api/course/${editCourse._id}`, {
+      const res = await fetch(`${API}/api/course/${editCourse._id}`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -153,7 +155,7 @@ export default function ManageCourse() {
     bulkFiles.forEach(f => formData.append('files', f))
     const token = localStorage.getItem('token')
     try {
-      const res = await fetch('http://localhost:5000/api/course/bulk-upload', {
+      const res = await fetch(`${API}/api/course/bulk-upload`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -238,7 +240,7 @@ export default function ManageCourse() {
             )}
             <NavLink to={`/course/${course._id}`} className="flex-1 flex flex-col">
               {course.banner && (
-                <img src={`http://localhost:5000${course.banner}`} alt={course.name} className="w-full h-40 object-cover bg-gray-100" /> /* Changed background */
+                <img src={`${API}${course.banner}`} alt={course.name} className="w-full h-40 object-cover bg-gray-100" /> /* Changed background */
               )}
               <div className="p-4 flex-1 flex flex-col">
                 <h3 className="text-lg font-bold text-indigo-700 mb-1 group-hover:text-indigo-800 transition-colors">{course.name}</h3> {/* Changed text color */}

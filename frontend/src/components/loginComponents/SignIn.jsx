@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import { motion, AnimatePresence } from 'framer-motion'
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function SignIn() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -17,7 +19,7 @@ export default function SignIn() {
     e.preventDefault()
     setLoading(true)
     try {
-      const res = await fetch('http://localhost:5000/api/auth/login', {
+      const res = await fetch(`${API}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

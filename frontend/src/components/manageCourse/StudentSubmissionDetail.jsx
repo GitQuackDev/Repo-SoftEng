@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function StudentSubmissionDetail({ assignment, user, onBack }) {
   const [file, setFile] = useState(null)
   const [uploading, setUploading] = useState(false)
@@ -29,7 +31,7 @@ export default function StudentSubmissionDetail({ assignment, user, onBack }) {
     const formData = new FormData()
     formData.append('file', file)
     try {
-      const res = await fetch(`http://localhost:5000/api/submission/${assignment._id}/submit`, {
+      const res = await fetch(`${API}/api/submission/${assignment._id}/submit`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData
@@ -50,7 +52,7 @@ export default function StudentSubmissionDetail({ assignment, user, onBack }) {
     setSuccess('')
     const token = localStorage.getItem('token')
     try {
-      const res = await fetch(`http://localhost:5000/api/submission/${assignment._id}/unsubmit`, {
+      const res = await fetch(`${API}/api/submission/${assignment._id}/unsubmit`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       })

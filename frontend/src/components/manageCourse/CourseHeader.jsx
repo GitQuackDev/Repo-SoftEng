@@ -1,10 +1,12 @@
 import React from 'react'
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function CourseHeader({ course }) {
   if (!course) return null
   return (
     <div className="flex flex-col md:flex-row gap-6 mb-8 bg-white rounded-2xl shadow-lg p-6">
-      {course.banner && <img src={`http://localhost:5000${course.banner}`} alt={course.name} className="w-full md:w-64 h-40 object-cover rounded-2xl border border-gray-200" />}
+      {course.banner && <img src={`${API}${course.banner}`} alt={course.name} className="w-full md:w-64 h-40 object-cover rounded-2xl border border-gray-200" />}
       <div className="flex-1 flex flex-col justify-between">
         <div>
           <h1 className="text-3xl font-bold text-indigo-700 mb-2">{course.name}</h1>

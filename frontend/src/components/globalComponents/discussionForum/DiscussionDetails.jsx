@@ -6,6 +6,8 @@ import { FiThumbsUp, FiThumbsDown, FiMessageCircle, FiShare2, FiArrowLeft, FiEdi
 import DiscussionPost from './DiscussionPost';
 import ImageModal from './ImageModal';
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function DiscussionDetails() {
   const { id } = useParams();
   const [discussion, setDiscussion] = useState(null);
@@ -19,11 +21,10 @@ export default function DiscussionDetails() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const userId = user.id;
-  const backendUrl = 'http://localhost:5000';
   function getAttachmentUrl(fileUrl) {
     if (!fileUrl) return '';
     if (fileUrl.startsWith('http')) return fileUrl;
-    return backendUrl + fileUrl;
+    return API + fileUrl;
   }
 
   useEffect(() => {

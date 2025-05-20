@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import StudentSubmissionDetail from './StudentSubmissionDetail'
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function StudentSubmission({ course }) {
   const [assignments, setAssignments] = useState([])
   const [loading, setLoading] = useState(true)
@@ -16,7 +18,7 @@ export default function StudentSubmission({ course }) {
     setLoading(true);
     const token = localStorage.getItem('token'); // Get token
 
-    fetch(`http://localhost:5000/api/submission/course/${course._id}`, {
+    fetch(`${API}/api/submission/course/${course._id}`, {
       headers: { // Add headers object
         'Authorization': `Bearer ${token}` // Include Authorization header
       }

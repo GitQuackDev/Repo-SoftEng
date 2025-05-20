@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import StudentCourseTab from '../../components/manageCourse/StudentCoursetab'
 
+const API = import.meta.env.VITE_API_URL || ''
+
 // This page displays the student course tab, which is the dashboard, lesson, and submission.
 // It uses StudentCourseTab, StudentDashboard, StudentLessonPage, and StudentSubmission components.
 export default function StudentCourse() {
@@ -11,7 +13,7 @@ export default function StudentCourse() {
 
   useEffect(() => {
     const token = localStorage.getItem('token')
-    fetch(`http://localhost:5000/api/course/${id}`, {
+    fetch(`${API}/api/course/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())

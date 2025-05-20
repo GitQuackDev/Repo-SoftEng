@@ -9,6 +9,8 @@ const roles = [
 	{ value: 'admin', label: 'Admin' },
 ]
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function SignUp() {
 	const [name, setName] = useState('')
 	const [email, setEmail] = useState('')
@@ -22,7 +24,7 @@ export default function SignUp() {
 		setLoading(true)
 		setError('')
 		try {
-			const res = await fetch('http://localhost:5000/api/auth/register', {
+			const res = await fetch(`${API}/api/auth/register`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ name, email, password, role }),

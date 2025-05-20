@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import LessonEditor from './LessonEditor'
 import { PlusCircle, BookOpen, MoreVertical, Trash2, Edit2 } from 'lucide-react'
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function LessonList({ courseId, refreshCourse }) {
   const [lessons, setLessons] = useState([])
   const [editingLesson, setEditingLesson] = useState(null)
@@ -16,7 +18,7 @@ export default function LessonList({ courseId, refreshCourse }) {
     setLoading(true)
     setError('')
     const token = localStorage.getItem('token')
-    fetch(`http://localhost:5000/api/course/${courseId}`,
+    fetch(`${API}/api/course/${courseId}`,
       { headers: { Authorization: `Bearer ${token}` } })
       .then(res => res.json())
       .then(data => {
@@ -49,8 +51,8 @@ export default function LessonList({ courseId, refreshCourse }) {
     const isEdit = Boolean(lesson._id)
     const lessonId = lesson._id
     const url = isEdit
-      ? `http://localhost:5000/api/course/${courseId}/lesson/${lessonId}`
-      : `http://localhost:5000/api/course/${courseId}/lesson`
+      ? `${API}/api/course/${courseId}/lesson/${lessonId}`
+      : `${API}/api/course/${courseId}/lesson`
     const method = isEdit ? 'PATCH' : 'POST'
     // Ensure every actionStep has a persistent stepId
     const actionSteps = (lesson.actionSteps || []).map((step, idx) => ({
@@ -89,7 +91,7 @@ export default function LessonList({ courseId, refreshCourse }) {
               if (f instanceof File) formData.append('files', f)
             })
             const stepId = step.stepId
-            const uploadRes = await fetch(`http://localhost:5000/api/course/${courseId}/lesson/${realLessonId}/step/${stepId}/upload`, {
+            const uploadRes = await fetch(`${API}/api/course/${courseId}/lesson/${realLessonId}/step/${stepId}/upload`, {
               method: 'POST',
               headers: { Authorization: `Bearer ${token}` },
               body: formData,
@@ -124,7 +126,7 @@ export default function LessonList({ courseId, refreshCourse }) {
     setError('')
     const token = localStorage.getItem('token')
     try {
-      const res = await fetch(`http://localhost:5000/api/course/${courseId}/lesson/${lessonId}`, {
+      const res = await fetch(`${API}/api/course/${courseId}/lesson/${lessonId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })
