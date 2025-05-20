@@ -58,14 +58,14 @@ export default function CommentList({ discussionId, refresh }) {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/discussion-forum/comments/${discussionId}`)
+    fetch(`${API}/api/discussion-forum/comments/${discussionId}`)
       .then(res => res.json())
       .then(data => {
         setComments(data);
         setLoading(false);
       });
     // Fetch discussion to get author id
-    fetch(`/api/discussion-forum/discussions/${discussionId}`)
+    fetch(`${API}/api/discussion-forum/discussions/${discussionId}`)
       .then(res => res.json())
       .then(data => setDiscussionAuthorId(data.author?._id));
   }, [discussionId, refresh, refreshKey]);
@@ -99,7 +99,7 @@ function CommentItem({ comment, depth, onRefresh, userId, discussionAuthorId, se
   const canDelete = isAuthor || String(userId) === String(discussionAuthorId);
 
   const handleLike = async () => {
-    await fetch(`/api/discussion-forum/comments/${comment._id}/like`, {
+    await fetch(`${API}/api/discussion-forum/comments/${comment._id}/like`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     });
@@ -107,7 +107,7 @@ function CommentItem({ comment, depth, onRefresh, userId, discussionAuthorId, se
     onRefresh();
   };
   const handleDislike = async () => {
-    await fetch(`/api/discussion-forum/comments/${comment._id}/dislike`, {
+    await fetch(`${API}/api/discussion-forum/comments/${comment._id}/dislike`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     });
@@ -115,7 +115,7 @@ function CommentItem({ comment, depth, onRefresh, userId, discussionAuthorId, se
   };
   const handleDelete = async () => {
     if (!window.confirm('Delete this comment?')) return;
-    await fetch(`/api/discussion-forum/comments/${comment._id}`, {
+    await fetch(`${API}/api/discussion-forum/comments/${comment._id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     });
