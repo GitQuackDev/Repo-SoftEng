@@ -15,7 +15,7 @@ exports.predict = async (req, res) => {
 
     // Forward the image to FastAPI
     const response = await axios.post(
-      'http://localhost:8000/predict/',
+      process.env.AITOOLS_URL + '/predict/',
       form,
       {
         headers: {

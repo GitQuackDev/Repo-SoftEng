@@ -48,8 +48,8 @@ function AppRoutes() {
     // Not logged in, always show login page
     return (
       <Routes>
-        <Route path="/*" element={<LoginPage />} />
-        <Route path="/" element={<LoginPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     )
   }

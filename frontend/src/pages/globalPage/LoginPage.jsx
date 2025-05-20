@@ -33,7 +33,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans">
-      <div className="bg-white shadow-xl rounded-lg p-8 w-full max-w-md border border-slate-200">
+      <div className="w-full max-w-md">
         <div className="flex justify-center mb-8 space-x-2">
           {tabs.map(tab => (
             <button

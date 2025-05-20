@@ -7,11 +7,22 @@ import io
 from PIL import Image
 import requests
 import re
+import os
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
 # Load the pre-trained ResNet50 model
 model = ResNet50(weights="imagenet")
+
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[os.getenv("CORS_ORIGIN", "*")],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def read_root():
