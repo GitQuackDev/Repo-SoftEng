@@ -159,6 +159,8 @@ function UserModal({ open, onClose, onSave, initial, isEdit }) {
 	)
 }
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function Admin() {
 	const [users, setUsers] = useState([])
 	const [loading, setLoading] = useState(true)
@@ -168,7 +170,7 @@ export default function Admin() {
 
 	// Fetch all users
 	useEffect(() => {
-		fetch('/api/user/', {
+		fetch(`${API}/api/user/`, {
 			headers: { Authorization: `Bearer ${token}` },
 		})
 			.then((res) => res.json())
@@ -186,7 +188,7 @@ export default function Admin() {
 	const handleSave = async (form, setModalLoading) => {
 		try {
 			const method = modal.isEdit ? 'PUT' : 'POST'
-			const url = modal.isEdit ? `/api/user/${modal.user._id}` : '/api/user/'
+			const url = modal.isEdit ? `${API}/api/user/${modal.user._id}` : `${API}/api/user/`
 			const body = { ...form }
 			if (modal.isEdit && !form.password) delete body.password
 			const res = await fetch(url, {
@@ -212,7 +214,7 @@ export default function Admin() {
 	const handleDelete = async () => {
 		if (!deleteUser) return
 		try {
-			const res = await fetch(`/api/user/${deleteUser._id}`, {
+			const res = await fetch(`${API}/api/user/${deleteUser._id}`, {
 				method: 'DELETE',
 				headers: { Authorization: `Bearer ${token}` },
 			})
