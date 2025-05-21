@@ -90,6 +90,7 @@ function AppRoutes() {
         <>
           <Route path="/" element={<ProtectedRoute><MainLayout><Navigate to="/admin" /></MainLayout></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute><MainLayout><Admin /></MainLayout></ProtectedRoute>} />
+          <Route path="/cnn-ai" element={<ProtectedRoute><MainLayout><CnnAi /></MainLayout></ProtectedRoute>} />
           <Route path="/discussion" element={<ProtectedRoute><MainLayout><DiscussionBoard /></MainLayout></ProtectedRoute>} />
           <Route path="/discussion/:id" element={<ProtectedRoute><MainLayout><DiscussionDetails /></MainLayout></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><MainLayout><Settings /></MainLayout></ProtectedRoute>} />
