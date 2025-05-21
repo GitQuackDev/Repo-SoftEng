@@ -49,9 +49,9 @@ export default function Sidebar({ open = false, setOpen }) {
       {/* Hamburger button for mobile */}
       <button
         className="fixed top-4 left-4 z-50 md:hidden bg-white rounded-full p-2 shadow-lg border border-slate-200"
-        style={{ display: open ? 'none' : 'block' }}
         aria-label="Open sidebar menu"
         onClick={() => setOpen && setOpen(true)}
+        style={{ display: open ? 'none' : undefined }}
       >
         <Menu className="w-7 h-7 text-sky-700" />
       </button>
