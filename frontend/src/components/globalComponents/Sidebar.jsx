@@ -127,14 +127,7 @@ export default function Sidebar({ open = false, setOpen }) {
               </>
             )}
             {role === 'admin' && (
-              <>
-                <NavLink to="/admin" className={({ isActive }) => `flex items-center gap-3 px-6 py-3 mx-2 rounded-lg transition-all duration-200 group relative text-base font-medium focus:outline-none focus:ring-2 focus:ring-sky-500 ${isActive ? 'bg-sky-100 text-sky-700 shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-sky-700'}`}>
-                  <LayoutDashboard className="w-5 h-5 text-slate-400 group-hover:text-sky-600" /> <span>Admin</span>
-                </NavLink>
-                <NavLink to="/cnn-ai" className={({ isActive }) => `flex items-center gap-3 px-6 py-3 mx-2 rounded-lg transition-all duration-200 group relative text-base font-medium focus:outline-none focus:ring-2 focus:ring-sky-500 ${isActive ? 'bg-sky-100 text-sky-700 shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-sky-700'}`}>
-                  <BrainCircuit className="w-5 h-5 text-slate-400 group-hover:text-sky-600" /> <span>CNN Ai</span>
-                </NavLink>
-              </>
+              <NavLink to="/admin" className={({ isActive }) => `flex items-center gap-3 px-6 py-3 mx-2 rounded-lg transition-all duration-200 group relative text-base font-medium focus:outline-none focus:ring-2 focus:ring-sky-500 ${isActive ? 'bg-sky-100 text-sky-700 shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-sky-700'}`}> <LayoutDashboard className="w-5 h-5 text-slate-400 group-hover:text-sky-600" /> <span>Admin</span> </NavLink>
             )}
             <div className="px-6 text-xs text-slate-500 mt-4 mb-2 tracking-widest font-medium">GENERAL</div>
             <NavLink to="/settings" className={({ isActive }) => `flex items-center gap-3 px-6 py-3 mx-2 rounded-lg transition-all duration-200 group relative text-base font-medium focus:outline-none focus:ring-2 focus:ring-sky-500 ${isActive ? 'bg-sky-100 text-sky-700 shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-sky-700'}`}> <Settings className="w-5 h-5 text-slate-400 group-hover:text-sky-600" /> <span>Settings</span> </NavLink>
