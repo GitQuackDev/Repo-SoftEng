@@ -20,7 +20,7 @@ model = ResNet50(weights="imagenet")
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[os.getenv("CORS_ORIGIN", "*")],
+    allow_origins=["*"],  # Allow all origins for deployment reliability
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

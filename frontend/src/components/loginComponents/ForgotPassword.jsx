@@ -16,6 +16,8 @@ const passwordStrength = (password) => {
   if (score >= 4) return { label: 'Strong', color: 'text-green-600' }
 }
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')
   const [step, setStep] = useState(1)
@@ -34,7 +36,7 @@ export default function ForgotPassword() {
     setEmailError('')
     setLoading(true)
     try {
-      const res = await fetch('/api/user/by-email', {
+      const res = await fetch(`${API}/api/user/by-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
@@ -70,7 +72,7 @@ export default function ForgotPassword() {
     }
     setLoading(true)
     try {
-      const res = await fetch('/api/user/reset-password', {
+      const res = await fetch(`${API}/api/user/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, newPassword })
