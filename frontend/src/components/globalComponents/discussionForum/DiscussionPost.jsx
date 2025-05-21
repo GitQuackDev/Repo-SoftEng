@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { FiEdit2, FiSend, FiPaperclip } from 'react-icons/fi';
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function DiscussionPost({ onSuccess, initialData, editMode, discussionId }) {
   const [title, setTitle] = useState(initialData?.title || '');
   const [body, setBody] = useState(initialData?.sections?.[0]?.content || '');
@@ -13,7 +15,7 @@ export default function DiscussionPost({ onSuccess, initialData, editMode, discu
     if (!file) return;
     const formData = new FormData();
     formData.append('file', file);
-    const res = await fetch('/api/discussion-forum/upload', {
+    const res = await fetch(`${API}/api/discussion-forum/upload`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       body: formData,
@@ -35,7 +37,7 @@ export default function DiscussionPost({ onSuccess, initialData, editMode, discu
     const bodyData = { title, sections };
     let res;
     if (editMode && discussionId) {
-      res = await fetch(`/api/discussion-forum/discussions/${discussionId}`, {
+      res = await fetch(`${API}/api/discussion-forum/discussions/${discussionId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -44,7 +46,7 @@ export default function DiscussionPost({ onSuccess, initialData, editMode, discu
         body: JSON.stringify(bodyData),
       });
     } else {
-      res = await fetch('/api/discussion-forum/discussions', {
+      res = await fetch(`${API}/api/discussion-forum/discussions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
