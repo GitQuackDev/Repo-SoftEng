@@ -9,6 +9,8 @@ import requests
 import re
 import os
 from fastapi.middleware.cors import CORSMiddleware
+import threading
+import time
 
 app = FastAPI()
 
@@ -216,3 +218,14 @@ async def predict(file: UploadFile = File(...)):
     if info.get("type") == "disambiguation":
         info["ambiguous"] = True
     return JSONResponse({"predictions": predictions, "info": info})
+
+def keep_alive():
+    import requests
+    while True:
+        try:
+            requests.get('http://localhost:10000/')
+        except Exception:
+            pass
+        time.sleep(600)  # 10 minutes
+
+threading.Thread(target=keep_alive, daemon=True).start()
