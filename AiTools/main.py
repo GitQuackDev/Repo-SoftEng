@@ -20,7 +20,7 @@ model = ResNet50(weights="imagenet")
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for deployment reliability
+    allow_origins=[os.getenv("CORS_ORIGIN", "*")],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -221,11 +221,22 @@ async def predict(file: UploadFile = File(...)):
 
 def keep_alive():
     import requests
+    import os
+    
+    # Get the port from environment variable that Render sets
+    port = os.environ.get("PORT", "10000")
+    
     while True:
         try:
-            requests.get('http://localhost:10000/')
-        except Exception:
-            pass
-        time.sleep(600)  # 10 minutes
+            # Use 0.0.0.0 or the actual deployed URL instead of localhost
+            requests.get(f'https://{os.environ.get("RENDER_EXTERNAL_URL", "localhost")}:{port}/')
+        except Exception as e:
+            print(f"Keep-alive ping failed: {str(e)}")
+        time.sleep(100)
 
 threading.Thread(target=keep_alive, daemon=True).start()
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", "10000"))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
