@@ -9,11 +9,7 @@ if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 const app = express()
 
 // Middleware
-const allowedOrigins = [
-  'https://softenglms.netlify.app',
-  'http://localhost:5173',
-  'https://softenglms-backend.onrender.com' // Add your deployed backend API URL here if needed
-];
+const allowedOrigins = (process.env.CORS_ORIGIN || '').split(',').map(o => o.trim());
 app.use(cors({
   origin: function(origin, callback) {
     // allow requests with no origin (like mobile apps, curl, etc.)
